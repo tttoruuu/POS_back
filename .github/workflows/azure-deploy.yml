@@ -7,7 +7,6 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: app-step4-9
-  ORYX_VERSION: 20240510.1
 
 jobs:
   build-and-deploy:
