@@ -1,4 +1,4 @@
-name: Deploy FastAPI to Azure App Service (Oryxなし)
+name: Deploy FastAPI to Azure App Service (venvなし安定版)
 
 on:
   push:
@@ -22,19 +22,13 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install dependencies
+    - name: Install dependencies (no venv)
       run: |
-        python -m venv venv
-        source venv/bin/activate
-        pip install -r requirements.txt
-
-    - name: Clean up unnecessary files for deployment
-      run: |
-        rm -rf __pycache__
+        pip install --target=.python_packages/lib/site-packages -r requirements.txt
 
     - name: Create deployment package
       run: |
-        zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd"
+        zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd" "__pycache__/*"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
