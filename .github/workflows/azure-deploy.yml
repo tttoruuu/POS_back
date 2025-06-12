@@ -7,18 +7,19 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: app-step4-9
-  PYTHON_VERSION: '3.11'
+  ORYX_VERSION: 20240510.1
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Oryx CLI (stable direct link)
+    - name: Install Oryx CLI (stable direct GitHub release)
       run: |
-        wget https://oryx-cdn.azureedge.net/20240510.1/oryx-linux-x64.tar.gz
+        wget https://github.com/microsoft/Oryx/releases/download/${ORYX_VERSION}/oryx-linux-x64.tar.gz
         mkdir oryx
         tar -xzf oryx-linux-x64.tar.gz -C oryx
         sudo mv oryx /opt/oryx
