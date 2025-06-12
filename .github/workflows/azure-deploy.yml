@@ -1,4 +1,4 @@
-name: Build and Deploy to Azure App Service
+name: Build and Deploy Python App to Azure App Service
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   PYTHON_VERSION: '3.11'
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,38 +32,15 @@ jobs:
       run: |
         # 必要なファイルのみを含むデプロイパッケージを作成
         mkdir -p deploy
-        cp -r app.py requirements.txt deploy/
+        cp -r main.py requirements.txt deploy/
         cp -r app deploy/
         cd deploy
         zip -r ../release.zip .
 
-    - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-app
-        path: release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
-    steps:
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v4
-      with:
-        name: python-app
-
-    - name: Unzip artifact for deployment
-      run: unzip release.zip
-    
-    - name: 'Deploy to Azure Web App'
-      id: deploy-to-webapp
+    - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         slot-name: 'Production'
-        package: .
+        package: release.zip
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }} 
