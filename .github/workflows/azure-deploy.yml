@@ -1,4 +1,4 @@
-name: Deploy to Azure App Service via Oryx Build
+name: Deploy FastAPI to Azure App Service (Oryxなし)
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: app-step4-9
+  PYTHON_VERSION: '3.11'
 
 jobs:
   build-and-deploy:
@@ -16,20 +17,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Oryx CLI (no sudo, local install)
-      run: |
-        wget https://github.com/microsoft/Oryx/releases/download/20240408.1/oryx_linux_x64.tar.gz
-        mkdir oryx-extracted
-        tar -xzf oryx_linux_x64.tar.gz -C oryx-extracted
-        chmod +x ./oryx-extracted/bin/oryx
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Build with Oryx
+    - name: Install dependencies
       run: |
-        ./oryx-extracted/bin/oryx build . -o output
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+    - name: Clean up unnecessary files for deployment
+      run: |
+        rm -rf venv
+        rm -rf __pycache__
+
+    - name: Create deployment package
+      run: |
+        zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd" "__pycache__/*"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: ./output
+        package: deployment.zip
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }}
