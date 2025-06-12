@@ -1,12 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
-import sqlite3
+from sqlalchemy.orm import Session
+from database import get_db, engine, Base
+from models import Product, Transaction, TransactionDetail
 
 app = FastAPI()
 
-DB_PATH = "pos_app.db"
-
+# データベーステーブルの作成
+Base.metadata.create_all(bind=engine)
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,18 +22,14 @@ app.add_middleware(
 
 # 商品マスタ検索API
 @app.get("/api/products/{code}")
-def get_product(code: str):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("SELECT prd_id, code, name, price FROM product_master WHERE code = ?", (code,))
-    row = cur.fetchone()
-    conn.close()
-    if row:
+def get_product(code: str, db: Session = Depends(get_db)):
+    product = db.query(Product).filter(Product.code == code).first()
+    if product:
         return {
-            "prd_id": row[0],
-            "code": row[1],
-            "name": row[2],
-            "price": row[3]
+            "prd_id": product.prd_id,
+            "code": product.code,
+            "name": product.name,
+            "price": product.price
         }
     else:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -51,22 +49,29 @@ class PurchaseRequest(BaseModel):
 
 # 購入API
 @app.post("/api/purchase")
-def purchase(req: PurchaseRequest):
+def purchase(req: PurchaseRequest, db: Session = Depends(get_db)):
     total_amt = sum(item.prd_price for item in req.items)
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+    
     # 取引登録
-    cur.execute(
-        "INSERT INTO transactions (emp_cd, store_cd, pos_no, total_amt) VALUES (?, ?, ?, ?)",
-        (req.emp_cd, req.store_cd, req.pos_no, total_amt)
+    transaction = Transaction(
+        emp_cd=req.emp_cd,
+        store_cd=req.store_cd,
+        pos_no=req.pos_no,
+        total_amt=total_amt
     )
-    trd_id = cur.lastrowid
+    db.add(transaction)
+    db.flush()  # トランザクションIDを取得するためにフラッシュ
+    
     # 取引明細登録
     for item in req.items:
-        cur.execute(
-            "INSERT INTO transaction_detail (trd_id, prd_id, prd_code, prd_name, prd_price) VALUES (?, ?, ?, ?, ?)",
-            (trd_id, item.prd_id, item.prd_code, item.prd_name, item.prd_price)
+        detail = TransactionDetail(
+            trd_id=transaction.trd_id,
+            prd_id=item.prd_id,
+            prd_code=item.prd_code,
+            prd_name=item.prd_name,
+            prd_price=item.prd_price
         )
-    conn.commit()
-    conn.close()
+        db.add(detail)
+    
+    db.commit()
     return {"success": True, "total_amt": total_amt} 
