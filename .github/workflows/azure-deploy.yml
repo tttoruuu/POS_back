@@ -21,7 +21,7 @@ jobs:
         wget https://github.com/microsoft/Oryx/releases/download/20240408.1/oryx_linux_x64.tar.gz
         mkdir oryx
         tar -xzf oryx_linux_x64.tar.gz -C oryx
-        sudo mv oryx /opt/oryx
+        sudo mv oryx/* /opt/oryx
 
     - name: Build with Oryx
       run: |
