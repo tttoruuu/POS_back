@@ -1,4 +1,4 @@
-name: Deploy to Azure App Service
+name: Deploy to Azure App Service via Oryx Build
 
 on:
   push:
@@ -10,19 +10,27 @@ env:
   PYTHON_VERSION: '3.11'
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+    - name: Install Oryx CLI
+      run: |
+        curl -L https://github.com/microsoft/Oryx/releases/latest/download/oryx-linux-x64.tar.gz -o oryx.tar.gz
+        mkdir oryx
+        tar -xzf oryx.tar.gz -C oryx
+        sudo mv oryx /opt/oryx
+        sudo ln -s /opt/oryx/oryx /usr/local/bin/oryx
 
-    - name: Deploy to Azure Web App (Oryx fully enabled)
+    - name: Build with Oryx
+      run: |
+        oryx build . -o output
+
+    - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: .
+        package: ./output
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }}
