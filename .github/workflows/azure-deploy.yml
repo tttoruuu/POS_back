@@ -1,4 +1,4 @@
-name: Deploy FastAPI to Azure App Service with Oryx
+name: Deploy FastAPI to Azure App Service (Run From Package方式)
 
 on:
   push:
@@ -16,8 +16,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Deploy using Oryx
-      uses: azure/appservice-build-deploy@v1
+    - name: Create deployment package (そのままzip)
+      run: |
+        zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd" "__pycache__/*"
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        package: deployment.zip
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }}
