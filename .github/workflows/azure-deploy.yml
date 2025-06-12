@@ -20,13 +20,11 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Create deployment package
-      run: |
-        zip -r release.zip . -x "*.git*" "*.github*"
+    # ここでzipを作らず、そのままディレクトリ指定でデプロイ
 
-    - name: Deploy to Azure Web App
+    - name: Deploy to Azure Web App (Oryx build enabled)
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: release.zip
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }} 
+        package: ./pos-backend   # <-- 重要!! ここをバックエンドディレクトリに指定
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }}
