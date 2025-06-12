@@ -26,5 +26,5 @@ jobs:
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: ./pos-backend   # <-- 重要!! ここをバックエンドディレクトリに指定
+        package: ./POSapp/pos-backend   # <-- 重要!! ここをバックエンドディレクトリに指定
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }}
