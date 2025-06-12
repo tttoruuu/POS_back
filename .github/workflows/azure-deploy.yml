@@ -30,12 +30,11 @@ jobs:
 
     - name: Clean up unnecessary files for deployment
       run: |
-        rm -rf venv
         rm -rf __pycache__
 
     - name: Create deployment package
       run: |
-        zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd" "__pycache__/*"
+        zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
