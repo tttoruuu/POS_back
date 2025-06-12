@@ -10,6 +10,25 @@ app = FastAPI()
 # データベーステーブルの作成
 Base.metadata.create_all(bind=engine)
 
+# ヘルスチェックエンドポイント
+@app.get("/api/health")
+def health_check():
+    return {"status": "healthy"}
+
+# 商品一覧取得API
+@app.get("/api/products")
+def get_products(db: Session = Depends(get_db)):
+    products = db.query(Product).all()
+    return [
+        {
+            "prd_id": product.prd_id,
+            "code": product.code,
+            "name": product.name,
+            "price": product.price
+        }
+        for product in products
+    ]
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
