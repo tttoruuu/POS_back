@@ -20,11 +20,9 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    # ここでzipを作らず、そのままディレクトリ指定でデプロイ
-
-    - name: Deploy to Azure Web App (Oryx build enabled)
+    - name: Deploy to Azure Web App (Oryx fully enabled)
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: .  # <-- 重要!! ここをバックエンドディレクトリに指定
+        package: .
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CABE38687E254784A578EFA69B237AA6 }}
