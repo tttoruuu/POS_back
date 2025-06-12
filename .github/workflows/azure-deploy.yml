@@ -1,4 +1,4 @@
-name: Deploy FastAPI to Azure App Service (Run From Package方式)
+name: Deploy FastAPI to Azure App Service (基本版・安定ルート)
 
 on:
   push:
@@ -16,7 +16,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Create deployment package (そのままzip)
+    # venv作らない・pip installも不要
+
+    - name: Create deployment package
       run: |
         zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd" "__pycache__/*"
 
