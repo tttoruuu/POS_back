@@ -1,4 +1,4 @@
-name: Deploy FastAPI to Azure App Service (venvなし安定版)
+name: Deploy FastAPI to Azure App Service (完全安定版)
 
 on:
   push:
@@ -26,7 +26,12 @@ jobs:
       run: |
         pip install --target=.python_packages/lib/site-packages -r requirements.txt
 
-    - name: Create deployment package
+    - name: Clean up any Oryx-related files
+      run: |
+        rm -f oryx-manifest.toml
+        rm -f startup.sh
+
+    - name: Create deployment package (最小構成)
       run: |
         zip -r deployment.zip . -x ".git/*" ".github/*" "*.pyc" "*.pyo" "*.pyd" "__pycache__/*"
 
