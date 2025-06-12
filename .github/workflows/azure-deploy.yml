@@ -16,17 +16,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Oryx CLI (working stable release)
+    - name: Install Oryx CLI (no sudo, local install)
       run: |
         wget https://github.com/microsoft/Oryx/releases/download/20240408.1/oryx_linux_x64.tar.gz
-        mkdir oryx
-        tar -xzf oryx_linux_x64.tar.gz -C oryx
-        sudo mkdir -p /opt/oryx
-        sudo mv oryx/* /opt/oryx
+        mkdir oryx-extracted
+        tar -xzf oryx_linux_x64.tar.gz -C oryx-extracted
 
     - name: Build with Oryx
       run: |
-        /opt/oryx/oryx build . -o output
+        ./oryx-extracted/oryx build . -o output
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
