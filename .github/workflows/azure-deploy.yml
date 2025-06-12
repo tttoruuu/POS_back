@@ -32,8 +32,12 @@ jobs:
       run: |
         # 必要なファイルのみを含むデプロイパッケージを作成
         mkdir -p deploy
-        cp -r main.py requirements.txt deploy/
-        cp -r app deploy/
+        # メインファイルと設定ファイルをコピー
+        cp main.py models.py database.py requirements.txt startup.sh deploy/
+        # alembicディレクトリをコピー
+        cp -r alembic deploy/
+        cp alembic.ini deploy/
+        # デプロイパッケージを作成
         cd deploy
         zip -r ../release.zip .
 
