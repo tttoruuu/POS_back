@@ -16,11 +16,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Oryx CLI
+    - name: Install Oryx CLI (stable direct link)
       run: |
-        curl -L https://github.com/microsoft/Oryx/releases/latest/download/oryx-linux-x64.tar.gz -o oryx.tar.gz
+        wget https://oryx-cdn.azureedge.net/20240510.1/oryx-linux-x64.tar.gz
         mkdir oryx
-        tar -xzf oryx.tar.gz -C oryx
+        tar -xzf oryx-linux-x64.tar.gz -C oryx
         sudo mv oryx /opt/oryx
         sudo ln -s /opt/oryx/oryx /usr/local/bin/oryx
 
